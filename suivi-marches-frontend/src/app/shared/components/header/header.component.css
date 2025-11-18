@@ -1,0 +1,483 @@
+/* Import Poppins Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Header Container */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: linear-gradient(90deg, #1565C0 0%, #42A5F5 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border-radius: 0; /* ✅ Removed border radius */
+  font-family: 'Poppins', sans-serif;
+}
+
+.app-header.scrolled {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(90deg, rgba(21, 101, 192, 0.95) 0%, rgba(66, 165, 245, 0.95) 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.header-container {
+  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Left Section: Branding */
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.02);
+}
+
+.logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover .logo-icon {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+.app-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #E3F2FD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Center Section: Page Title */
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.page-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: #FFFFFF;
+  transition: width 0.3s ease;
+}
+
+.page-title:hover::after {
+  width: 100%;
+}
+
+/* Right Section: User Actions */
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+/* Icon Buttons */
+.icon-button {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.icon-button:active {
+  transform: translateY(0);
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #F44336;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* User Profile */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #90CAF9, #42A5F5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-initials {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.user-role {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
+}
+
+.dropdown-arrow {
+  color: #FFFFFF;
+  transition: transform 0.3s ease;
+}
+
+.user-profile:hover .dropdown-arrow {
+  transform: translateY(2px);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  min-width: 220px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1001;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  color: #333333;
+}
+
+.dropdown-item:hover {
+  background: #F5F5F5;
+}
+
+.dropdown-item svg {
+  color: #1565C0;
+}
+
+.dropdown-item.logout {
+  color: #F44336;
+}
+
+.dropdown-item.logout svg {
+  color: #F44336;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #E0E0E0;
+  margin: 4px 0;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-button {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: #FFFFFF;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.mobile-menu-header {
+  padding: 24px;
+  background: linear-gradient(90deg, #1565C0 0%, #42A5F5 100%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-avatar.large {
+  width: 56px;
+  height: 56px;
+}
+
+.user-avatar.large .avatar-initials {
+  font-size: 1.3rem;
+}
+
+.user-info-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-info-mobile .user-name {
+  font-size: 1.1rem;
+}
+
+.user-info-mobile .user-role {
+  font-size: 0.9rem;
+}
+
+.mobile-menu-actions {
+  padding: 8px;
+}
+
+.mobile-menu-item {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #333333;
+  border-radius: 8px;
+  position: relative;
+}
+
+.mobile-menu-item:hover {
+  background: #F5F5F5;
+}
+
+.mobile-menu-item svg {
+  color: #1565C0;
+}
+
+.mobile-menu-item.logout {
+  color: #F44336;
+}
+
+.mobile-menu-item.logout svg {
+  color: #F44336;
+}
+
+.mobile-menu-divider {
+  height: 1px;
+  background: #E0E0E0;
+  margin: 8px 0;
+}
+
+/* Responsive Design */
+
+/* Tablets and Medium Screens */
+@media (max-width: 1024px) {
+  .app-title {
+    font-size: 1.1rem;
+  }
+  
+  .page-title {
+    font-size: 1rem;
+  }
+}
+
+/* Mobile and Small Tablets */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+  }
+  
+  .app-title {
+    font-size: 0;
+    width: 0;
+    overflow: hidden;
+  }
+  
+  .header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .page-title {
+    font-size: 1rem;
+  }
+  
+  .desktop-actions {
+    display: none;
+  }
+  
+  .mobile-menu-button {
+    display: flex;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .app-header {
+    height: 60px;
+    border-radius: 0; /* ✅ Ensure no radius on mobile too */
+  }
+  
+  .logo-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .page-title {
+    font-size: 0.9rem;
+  }
+  
+  .mobile-menu {
+    top: 60px;
+  }
+}

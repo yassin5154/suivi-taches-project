@@ -1,0 +1,32 @@
+<div class="app-layout">
+  
+  <!-- Sidebar Component -->
+  <app-sidebar 
+    *ngIf="currentPageConfig.showSidebar"
+    (toggleEvent)="onSidebarToggle($event)"
+    (closeEvent)="onSidebarClose()">
+  </app-sidebar>
+
+  <!-- Main Container (Header + Content + Footer) -->
+  <div [ngClass]="mainContainerClass">
+    
+    <!-- Header Component -->
+    <app-header 
+      *ngIf="currentPageConfig.showHeader"
+      [pageTitle]="currentPageTitle">
+    </app-header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Router Outlet - Where page content loads -->
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+    <!-- Footer Component -->
+    <app-footer *ngIf="currentPageConfig.showFooter"></app-footer>
+    
+  </div>
+
+</div>

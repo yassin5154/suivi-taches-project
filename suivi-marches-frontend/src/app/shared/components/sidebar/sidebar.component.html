@@ -1,0 +1,88 @@
+<!-- Overlay for mobile -->
+<div class="sidebar-overlay" 
+     *ngIf="isMobile && isOpen" 
+     (click)="closeSidebar()">
+</div>
+
+<!-- Sidebar Container -->
+<aside class="sidebar" 
+       [class.collapsed]="isCollapsed && !isMobile"
+       [class.mobile-open]="isMobile && isOpen"
+       [class.mobile-closed]="isMobile && !isOpen">
+
+  <!-- Toggle Button -->
+  <button class="sidebar-toggle" 
+          (click)="toggleSidebar()"
+          [title]="isCollapsed ? 'Développer' : 'Réduire'">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Top Section: User Info -->
+  <div class="sidebar-user">
+    <div class="user-avatar-container">
+      <div class="user-avatar">
+        <img *ngIf="userInfo.avatar" [src]="userInfo.avatar" [alt]="userInfo.name">
+        <span *ngIf="!userInfo.avatar" class="avatar-initials">{{ getUserInitials() }}</span>
+      </div>
+      <div class="user-status-indicator"></div>
+    </div>
+    
+    <div class="user-details" *ngIf="!isCollapsed || isMobile">
+      <h3 class="user-name">{{ userInfo.name }}</h3>
+      <p class="user-role">{{ userInfo.role }}</p>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <!-- Middle Section: Navigation Menu -->
+  <nav class="sidebar-menu">
+    <a *ngFor="let item of currentMenuItems"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       class="menu-item"
+       (click)="closeSidebar()"
+       [title]="isCollapsed ? item.label : ''">
+      
+      <div class="menu-item-content">
+        <span class="menu-icon material-icons">{{ item.icon }}</span>
+        <span class="menu-label" *ngIf="!isCollapsed || isMobile">{{ item.label }}</span>
+        <span class="menu-badge" *ngIf="item.badge && (!isCollapsed || isMobile)">
+          {{ item.badge }}
+        </span>
+      </div>
+      
+      <div class="menu-item-indicator"></div>
+    </a>
+  </nav>
+
+  <!-- Bottom Section: Utility Links -->
+  <div class="sidebar-footer">
+    <div class="sidebar-divider"></div>
+    
+    <a routerLink="/help" 
+       class="footer-link"
+       (click)="closeSidebar()"
+       [title]="isCollapsed ? 'Aide / Contact' : ''">
+      <span class="material-icons footer-icon">help_outline</span>
+      <span class="footer-text" *ngIf="!isCollapsed || isMobile">Aide / Contact</span>
+    </a>
+
+    <div class="app-version" *ngIf="!isCollapsed || isMobile">
+      <span class="material-icons version-icon">info</span>
+      <span class="version-text">Version {{ appVersion }}</span>
+    </div>
+
+    <button class="logout-button" 
+            (click)="logout()"
+            [title]="isCollapsed ? 'Se déconnecter' : ''">
+      <span class="material-icons logout-icon">power_settings_new</span>
+      <span class="logout-text" *ngIf="!isCollapsed || isMobile">Se déconnecter</span>
+    </button>
+  </div>
+
+</aside>
