@@ -1,34 +1,103 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Employe } from '../models/employe';
 import { environment } from '../../../environments/environment';
+
+export interface BesoinRequest {
+  titre: string;
+  description: string;
+  fichierCPS: string;
+}
+
+export interface Besoin {
+  id: number;
+  titre: string;
+  description: string;
+  fichierCPS: string;
+  dateCreation: string;
+  statut: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeService {
-  private apiUrl = `${environment.apiUrl}/employes`;
+  private apiUrl = `${environment.apiUrl}/employe`;
+  private uploadUrl = `${environment.apiUrl}/upload`;
 
   constructor(private http: HttpClient) {}
 
+  // File upload method - FIX: Use { responseType: 'text' }
+  uploadFile(formData: FormData): Observable<string> {
+    return this.http.post(`${this.uploadUrl}/cps`, formData, { 
+      responseType: 'text' 
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Create besoin with JSON data
+  createBesoin(employeId: number, besoinData: any): Observable<Besoin> {
+    return this.http.post<Besoin>(`${this.apiUrl}/${employeId}/besoin`, besoinData)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  getBesoins(employeId: number): Observable<Besoin[]> {
+    return this.http.get<Besoin[]>(`${this.apiUrl}/${employeId}/besoins`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
   getAll(): Observable<Employe[]> {
-    return this.http.get<Employe[]>(this.apiUrl);
+    return this.http.get<Employe[]>(this.apiUrl)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
   getById(id: number): Observable<Employe> {
-    return this.http.get<Employe>(`${this.apiUrl}/${id}`);
+    return this.http.get<Employe>(`${this.apiUrl}/${id}`)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
   add(employe: Employe): Observable<Employe> {
-    return this.http.post<Employe>(this.apiUrl, employe);
+    return this.http.post<Employe>(this.apiUrl, employe)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
   update(id: number, employe: Employe): Observable<Employe> {
-    return this.http.put<Employe>(`${this.apiUrl}/${id}`, employe);
+    return this.http.put<Employe>(`${this.apiUrl}/${id}`, employe)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Une erreur est survenue';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Erreur: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage = `Code d'erreur: ${error.status}\nMessage: ${error.message}`;
+    }
+    console.error(errorMessage);
+    return throwError(() => new Error(errorMessage));
   }
 }

@@ -13,9 +13,11 @@ export interface AuthResponse {
   type: string;
   username: string;
   role: string;
+  id?: number; // Add this field to your backend response
 }
 
 export interface UserInfo {
+  id?: number; // Add this field
   username: string;
   role: string;
   name: string;
@@ -41,6 +43,7 @@ export class AuthService {
         tap((response: AuthResponse) => {
           this.saveToken(response.token);
           const userInfo: UserInfo = {
+            id: response.id, // Store the ID from backend
             username: response.username,
             role: response.role,
             name: this.formatName(response.username),
@@ -51,6 +54,50 @@ export class AuthService {
       );
   }
 
+  // Add this method to get current user ID
+  getCurrentUserId(): number | null {
+  const user = this.getCurrentUser();
+  console.log('Current user from storage:', user);
+  
+  if (user && user.id) {
+    console.log('User ID from storage:', user.id, 'Type:', typeof user.id);
+    return Number(user.id); // Assurez-vous que c'est un nombre
+  }
+  
+  // Fallback: Essayez d'extraire de JWT
+  const token = this.getToken();
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('JWT payload:', payload);
+      const userId = payload.id || payload.userId || payload.sub;
+      return userId ? Number(userId) : null;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  }
+  
+  console.warn('No user ID found');
+  return null;
+}
+
+  // Extract user ID from JWT token as fallback
+  private extractUserIdFromToken(): number | null {
+    const token = this.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        // Try different possible field names for user ID
+        return payload.id || payload.userId || payload.sub || null;
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // Rest of your existing methods remain the same...
   register(data: any): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data);
   }

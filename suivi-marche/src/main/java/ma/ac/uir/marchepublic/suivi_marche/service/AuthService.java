@@ -48,7 +48,7 @@ public class AuthService implements UserDetailsService {
 
         String jwt = jwtUtils.generateJwtToken(utilisateur.getUsername());
 
-        return new AuthResponse(jwt, utilisateur.getUsername(), utilisateur.getRole());
+        return new AuthResponse(jwt, utilisateur.getUsername(), utilisateur.getRole(), utilisateur.getId());
     }
 
     public AuthResponse register(LoginRequest registerRequest) {
@@ -78,6 +78,6 @@ public class AuthService implements UserDetailsService {
         utilisateurRepository.save(utilisateur);
 
         String jwt = jwtUtils.generateJwtToken(utilisateur.getUsername());
-        return new AuthResponse(jwt, utilisateur.getUsername(), utilisateur.getRole());
+        return new AuthResponse(jwt, utilisateur.getUsername(), utilisateur.getRole(), utilisateur.getId());
     }
 }

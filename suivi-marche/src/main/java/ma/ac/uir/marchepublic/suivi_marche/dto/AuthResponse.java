@@ -5,14 +5,16 @@ public class AuthResponse {
     private String type = "Bearer";
     private String username;
     private String role;
+    private Long id;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String token, String username, String role) {
+    public AuthResponse(String token, String username, String role, Long id) {
         this.token = token;
         this.username = username;
         this.role = role;
+        this.id = id;
     }
 
     // Getters and Setters
@@ -46,5 +48,13 @@ public class AuthResponse {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
