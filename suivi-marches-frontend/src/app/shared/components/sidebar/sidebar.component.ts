@@ -89,7 +89,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { 
       label: 'Validation des tâches', 
       icon: 'check_circle', 
-      route: '/chef/validation', 
+      route: '/chef-service/validation-taches', 
       roles: ['CHEF'] 
     },
     { 

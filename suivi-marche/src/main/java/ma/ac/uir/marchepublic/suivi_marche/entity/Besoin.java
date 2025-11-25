@@ -1,7 +1,10 @@
 package ma.ac.uir.marchepublic.suivi_marche.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "besoins")
@@ -25,6 +28,14 @@ public class Besoin {
     private Employe employe;
 
     private String statut = "EN_ATTENTE"; // EN_ATTENTE, ACCEPTE, REFUSE
+
+    private String motifRefus;
+
+    private LocalDate validationDate;
+
+    @OneToMany(mappedBy = "besoin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Tache> taches = new ArrayList<>();
 
     public Besoin() {
     }
@@ -84,5 +95,29 @@ public class Besoin {
 
     public void setStatut(String statut) {
         this.statut = statut;
+    }
+
+    public String getMotifRefus() {
+        return motifRefus;
+    }
+
+    public void setMotifRefus(String motifRefus) {
+        this.motifRefus = motifRefus;
+    }
+
+    public LocalDate getValidationDate() {
+        return validationDate;
+    }
+
+    public void setValidationDate(LocalDate validationDate) {
+        this.validationDate = validationDate;
+    }
+
+    public List<Tache> getTaches() {
+        return taches;
+    }
+
+    public void setTaches(List<Tache> taches) {
+        this.taches = taches;
     }
 }

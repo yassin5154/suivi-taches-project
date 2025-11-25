@@ -1,0 +1,54 @@
+====================================================
+        CAHIER DE PRESCRIPTIONS SPÉCIALES (CPS)
+           Service Comptabilité & Budget
+====================================================
+
+1. OBJECTIF
+----------------------
+Développer un système de gestion des factures fournisseurs 
+et suivi des paiements.
+
+tâches:
+- Analyse des processus comptables actuels
+- Conception de l'architecture du système
+- Développement du module facturation
+- Intégration avec le système bancaire
+- Formation des utilisateurs
+- Mise en production et support
+
+2. BÉNÉFICES ATTENDUS
+----------------------
+- Réduction des erreurs de paiement
+- Gain de temps sur le traitement des factures
+- Meilleure traçabilité des opérations
+
+3. RESSOURCES HUMAINES
+----------------------
+- 1 chef de projet
+- 2 développeurs
+- 1 expert métier comptabilité
+
+4. CONTRAINTES TECHNIQUES
+----------------------
+- Compatibilité avec le système existant
+- Respect des normes de sécurité financière
+- Interface intuitive pour les comptables
+
+5. LIVRABLES
+----------------------
+- Documentation technique
+- Code source commenté
+- Manuel utilisateur
+- Plan de formation
+
+6. DÉLAIS
+----------------------
+Durée : 45 jours ouvrables
+Date de début souhaitée : 01/12/2025
+
+7. BUDGET PRÉVISIONNEL
+----------------------
+- Développement : 45 000 DHS
+- Formation : 15 000 DHS
+- Infrastructure : 20 000 DHS
+Total : 80 000 DHS

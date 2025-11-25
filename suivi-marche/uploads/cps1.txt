@@ -1,0 +1,44 @@
+====================================================
+        CAHIER DE PRESCRIPTIONS SPÉCIALES (CPS)
+                Département des Finances
+====================================================
+
+1. OBJECTIF DU PROJET
+----------------------
+Automatiser le suivi des dépenses et engagements budgétaires 
+pour améliorer la transparence financière.
+
+2. TÂCHES À RÉALISER
+----------------------
+- Collecte et intégration des données financières
+- Conception du module de suivi budgétaire  
+- Mise en place du tableau de bord financier
+- Vérification de conformité réglementaire
+- Tests et validation du système
+
+3. MATÉRIELS REQUIS
+----------------------
+- Serveur dédié pour le stockage des données
+- Stations de travail pour les analystes
+
+4. LICENCES LOGICIELS REQUISES
+----------------------
+- Licence Windows Server 2022
+- Licence PostgreSQL Enterprise
+
+5. DURÉE TOTALE DU PROJET
+----------------------
+Durée estimée : 30 jours
+
+6. ESTIMATION DU BUDGET
+----------------------
+Budget total estimé : 75 000 DHS
+
+7. RISQUES POTENTIELS
+----------------------
+- Retards dans la collecte des données
+- Non-conformité aux normes
+
+8. REMARQUES
+----------------------
+Priorité élevée pour la direction financière.

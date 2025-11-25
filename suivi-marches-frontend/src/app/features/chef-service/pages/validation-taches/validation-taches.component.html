@@ -1,1 +1,342 @@
-<p>validation-taches works!</p>
+<!-- validation-taches.component.html -->
+<div class="page-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <h1 class="page-title">Validation des Besoins & Tâches</h1>
+    <p class="page-subtitle">Consultez et validez les besoins envoyés par votre équipe.</p>
+  </div>
+
+  <div class="content-grid">
+    <!-- Section 1: Liste des Besoins -->
+    <div class="besoins-section">
+      <h2 class="section-title">
+        <i class="icon-file"></i>
+        Besoins du Service
+      </h2>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoadingBesoins" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Chargement des besoins...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoadingBesoins && besoins.length === 0" class="empty-state">
+        <i class="icon-folder-open"></i>
+        <p>Aucun besoin à valider pour le moment</p>
+      </div>
+
+      <!-- Besoins List -->
+      <div class="besoins-list" *ngIf="!isLoadingBesoins && besoins.length > 0">
+        <div 
+          *ngFor="let besoin of besoins" 
+          class="besoin-card"
+          [class.selected]="selectedBesoin?.id === besoin.id"
+          (click)="openBesoin(besoin)">
+          
+          <div class="card-header">
+            <h3 class="besoin-titre">{{ besoin.titre }}</h3>
+            <span class="status-badge" [ngClass]="'status-' + besoin.statut.toLowerCase()">
+              {{ getStatutDisplay(besoin.statut) }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <div class="info-row">
+              <i class="icon-user"></i>
+              <span>{{ getEmployeeName(besoin) }}</span>
+            </div>
+            <div class="info-row">
+              <i class="icon-calendar"></i>
+              <span>{{ besoin.dateCreation | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <button class="btn-voir">
+            <i class="icon-eye"></i>
+            Voir & Valider
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 & 3: Besoin Details + Tasks -->
+    <div class="details-section" *ngIf="selectedBesoin">
+      <h2 class="section-title">Détails du Besoin</h2>
+
+      <!-- Informations du Besoin -->
+      <div class="info-card">
+        <h3 class="info-title">{{ selectedBesoin.titre }}</h3>
+        <div class="info-content">
+          <p><strong>Description:</strong> {{ selectedBesoin.description }}</p>
+          <p><strong>Employé:</strong> {{ getEmployeeName(selectedBesoin) }}</p>
+          <p><strong>Service:</strong> {{ getEmployeeService(selectedBesoin) }}</p>
+          <p><strong>Date de création:</strong> {{ selectedBesoin.dateCreation | date:'dd/MM/yyyy' }}</p>
+          <p>
+            <strong>Statut:</strong>
+            <span class="status-badge inline" [ngClass]="'status-' + selectedBesoin.statut.toLowerCase()">
+              {{ getStatutDisplay(selectedBesoin.statut) }}
+            </span>
+          </p>
+          <p *ngIf="selectedBesoin.motifRefus"><strong>Motif de refus:</strong> {{ selectedBesoin.motifRefus }}</p>
+        </div>
+      </div>
+
+      <!-- Affichage du fichier CPS -->
+      <div class="cps-card">
+        <div class="cps-header">
+          <i class="icon-file-text"></i>
+          <h3>Fichier CPS</h3>
+          <button *ngIf="!cpsContent && !isLoadingCps" class="btn-load-cps" (click)="loadCpsFile(selectedBesoin.id)">
+            <i class="icon-refresh"></i>
+            Charger le fichier
+          </button>
+        </div>
+        
+        <div *ngIf="isLoadingCps" class="loading-cps">
+          <div class="loading-spinner small"></div>
+          <span>Chargement du fichier CPS...</span>
+        </div>
+
+        <div class="cps-content" *ngIf="!isLoadingCps">
+          <pre class="cps-viewer" *ngIf="cpsContent">{{ cpsContent }}</pre>
+          <div *ngIf="!cpsContent" class="no-cps-content">
+            <i class="icon-file-x"></i>
+            <p>Aucun contenu à afficher</p>
+            <button class="btn-load-cps" (click)="loadCpsFile(selectedBesoin.id)">
+              Charger le fichier CPS
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons pour le Besoin -->
+      <div class="action-buttons" *ngIf="selectedBesoin.statut === 'EN_ATTENTE'">
+        <button class="btn-accept" (click)="acceptBesoin(selectedBesoin.id)">
+          <i class="icon-check"></i>
+          Accepter le Besoin
+        </button>
+        <button class="btn-refuse" (click)="openRefuseModal('besoin', selectedBesoin.id)">
+          <i class="icon-x"></i>
+          Refuser le Besoin
+        </button>
+      </div>
+
+      <!-- Section Tâches (after acceptance) -->
+      <div class="tasks-card" *ngIf="showTasksSection">
+        <div class="tasks-header">
+          <i class="icon-checklist"></i>
+          <h3>Tâches Générées depuis le CPS</h3>
+          <span class="tasks-count">{{ taches.length }} tâche(s)</span>
+        </div>
+
+        <div *ngIf="isLoadingTaches" class="loading-taches">
+          <div class="loading-spinner small"></div>
+          <span>Extraction des tâches depuis le CPS...</span>
+        </div>
+        
+        <div *ngIf="!isLoadingTaches && taches.length === 0" class="no-tasks">
+          <i class="icon-list-x"></i>
+          <p>Aucune tâche trouvée dans le fichier CPS.</p>
+        </div>
+
+        <!-- Dans la section tasks-list -->
+<div class="tasks-list" *ngIf="!isLoadingTaches && taches.length > 0">
+  <div *ngFor="let tache of taches; let i = index" class="task-item">
+    <div class="task-header">
+      <!-- Champ titre éditable -->
+      <input 
+        type="text" 
+        class="task-title-input"
+        [(ngModel)]="tache.titre"
+        placeholder="Titre de la tâche"
+        [disabled]="tache.statut !== 'EN_ATTENTE'">
+      
+      <span class="status-badge small" [ngClass]="'status-' + tache.statut.toLowerCase()">
+        {{ getTacheStatutDisplay(tache.statut) }}
+      </span>
+    </div>
+
+    <!-- Description (lecture seule ou éditable selon besoin) -->
+    <p class="task-description">{{ tache.description }}</p>
+
+    <!-- Champs de planification -->
+    <div class="task-fields" *ngIf="tache.statut === 'EN_ATTENTE'">
+      <div class="field-group">
+        <label>Date finale de réalisation:</label>
+        <input 
+          type="date" 
+          [(ngModel)]="tache.dateFinale"
+          class="field-input">
+      </div>
+
+      <div class="field-group">
+        <label>Durée estimée:</label>
+        <input 
+          type="text" 
+          [(ngModel)]="tache.dureeEstimee"
+          placeholder="ex: 2 semaines, 30 jours"
+          class="field-input">
+      </div>
+
+      <div class="field-group">
+        <label>Date limite (optionnelle):</label>
+        <input 
+          type="date" 
+          [(ngModel)]="tache.dateLimite"
+          class="field-input">
+      </div>
+    </div>
+
+    <p *ngIf="tache.motifRefus" class="task-motif">
+      <strong>Motif de refus:</strong> {{ tache.motifRefus }}
+    </p>
+
+    <div class="task-actions" *ngIf="tache.statut === 'EN_ATTENTE'">
+      <button 
+        class="btn-task-accept" 
+        (click)="acceptTache(tache)"
+        [disabled]="!canAcceptTache(tache)">
+        <i class="icon-check"></i>
+        Valider
+      </button>
+      <button class="btn-task-refuse" (click)="openRefuseModal('tache', null, tache.id)">
+        <i class="icon-x"></i>
+        Refuser
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Ajouter cette section après la tasks-list dans validation-taches.component.html -->
+<div class="add-task-section" *ngIf="selectedBesoin.statut === 'ACCEPTE'">
+  <div class="add-task-header">
+    <i class="icon-plus"></i>
+    <h3>Ajouter une Nouvelle Tâche</h3>
+    <button class="btn-toggle-add-task" (click)="toggleAddTaskForm()">
+      <i class="icon-plus"></i>
+      {{ showAddTaskForm ? 'Masquer' : 'Nouvelle Tâche' }}
+    </button>
+  </div>
+
+  <!-- Formulaire d'ajout de tâche -->
+  <div class="add-task-form" *ngIf="showAddTaskForm">
+    <div class="form-group">
+      <label for="newTaskTitle">Titre de la tâche *</label>
+      <input 
+        type="text" 
+        id="newTaskTitle"
+        [(ngModel)]="newTask.titre"
+        placeholder="Ex: Configuration du serveur"
+        class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label for="newTaskDescription">Description</label>
+      <textarea 
+        id="newTaskDescription"
+        [(ngModel)]="newTask.description"
+        placeholder="Description détaillée de la tâche..."
+        rows="3"
+        class="form-textarea">
+      </textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="newTaskDateFinale">Date finale de réalisation *</label>
+        <input 
+          type="date" 
+          id="newTaskDateFinale"
+          [(ngModel)]="newTask.dateFinale"
+          class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="newTaskDuree">Durée estimée *</label>
+        <input 
+          type="text" 
+          id="newTaskDuree"
+          [(ngModel)]="newTask.dureeEstimee"
+          placeholder="Ex: 2 semaines, 15 jours"
+          class="form-input">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="newTaskDateLimite">Date limite (optionnelle)</label>
+      <input 
+        type="date" 
+        id="newTaskDateLimite"
+        [(ngModel)]="newTask.dateLimite"
+        class="form-input">
+    </div>
+
+    <div class="form-actions">
+      <button 
+        class="btn-save-task" 
+        (click)="addNewTask()"
+        [disabled]="!canAddNewTask()">
+        <i class="icon-save"></i>
+        Ajouter la Tâche
+      </button>
+      <button class="btn-cancel-task" (click)="cancelAddTask()">
+        <i class="icon-x"></i>
+        Annuler
+      </button>
+    </div>
+  </div>
+</div>
+      </div>
+    </div>
+
+    <!-- Empty Details State -->
+    <div class="empty-details" *ngIf="!selectedBesoin && !isLoadingBesoins && besoins.length > 0">
+      <i class="icon-select"></i>
+      <h3>Sélectionnez un besoin</h3>
+      <p>Cliquez sur un besoin dans la liste pour voir ses détails et le valider.</p>
+    </div>
+  </div>
+
+  <!-- Modal de Refus -->
+  <div class="modal-overlay" *ngIf="showRefuseModal" (click)="closeRefuseModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <i class="icon-alert"></i>
+        <h3>Raison du Refus</h3>
+      </div>
+
+      <p class="modal-text">
+        Veuillez indiquer la raison pour laquelle vous refusez 
+        {{ refuseType === 'besoin' ? 'ce besoin' : 'cette tâche' }}.
+      </p>
+
+      <textarea 
+        class="modal-textarea"
+        [(ngModel)]="refusalReason"
+        placeholder="Saisissez votre raison..."
+        rows="5"
+        maxlength="500">
+      </textarea>
+      <div class="char-count">{{ refusalReason.length }}/500 caractères</div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-confirm" 
+                (click)="confirmRefusal()"
+                [disabled]="!refusalReason.trim()">
+          Confirmer le Refus
+        </button>
+        <button class="btn-modal-cancel" (click)="closeRefuseModal()">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div *ngIf="showNotification" class="notification-toast" [ngClass]="notificationType">
+    <i [class]="getNotificationIcon()"></i>
+    <span>{{ notificationMessage }}</span>
+    <button class="btn-close-toast" (click)="hideNotification()">×</button>
+  </div>
+</div>
