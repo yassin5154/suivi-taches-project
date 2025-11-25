@@ -1,0 +1,96 @@
+====================================================
+        CAHIER DE PRESCRIPTIONS SPÉCIALES (CPS)
+                Département des Finances
+====================================================
+
+1. OBJECTIF DU PROJET
+----------------------
+Mettre en place un système automatisé de suivi des dépenses,
+des engagements budgétaires et des paiements pour améliorer 
+la transparence, réduire les erreurs manuelles et accélérer 
+le traitement des opérations financières de l’établissement.
+
+Le projet vise également à faciliter l’édition des rapports 
+financiers mensuels et annuels conformément aux normes internes 
+et réglementaires.
+
+
+2. TÂCHES À RÉALISER
+----------------------
+
+Tâche 1 :
+    Titre : Collecte et intégration des données financières
+    Description : Rassembler toutes les données des dépenses, recettes,
+                  engagements, mandats et opérations bancaires des
+                  12 derniers mois. Vérifier l’exactitude des chiffres.
+    Durée estimée : 5 jours
+    Date limite : 10/03/2025
+
+Tâche 2 :
+    Titre : Conception du module de suivi budgétaire
+    Description : Développer un module permettant de suivre en temps réel
+                  l’état du budget (engagé / consommé / restant).
+    Durée estimée : 7 jours
+    Date limite : 17/03/2025
+
+Tâche 3 :
+    Titre : Mise en place du tableau de bord financier
+    Description : Créer un dashboard comprenant des graphiques sur :
+                  - état du budget par département
+                  - dépenses mensuelles
+                  - écarts budgétaires
+                  - alertes sur dépassements
+    Durée estimée : 6 jours
+    Date limite : 23/03/2025
+
+Tâche 4 :
+    Titre : Vérification de conformité réglementaire
+    Description : S’assurer que le système respecte les règles
+                  de gestion financière internes et celles du ministère.
+    Durée estimée : 3 jours
+    Date limite : 26/03/2025
+
+
+3. MATÉRIELS REQUIS
+----------------------
+- Serveur dédié pour le stockage des données financières  
+- Onduleur pour sécuriser l'alimentation électrique  
+- Station de travail pour le responsable du projet  
+- Système de sauvegarde automatique (NAS)  
+
+
+4. LICENCES LOGICIELS REQUISES
+----------------------
+- Licence Windows Server 2022  
+- Licence PostgreSQL Enterprise (ou équivalent open-source si validé)  
+- Licence Power BI Pro pour les tableaux de bord  
+- Antivirus institutionnel (licence annuelle)  
+
+
+5. DURÉE TOTALE DU PROJET
+----------------------
+Durée estimée globale : 21 à 25 jours  
+Date de livraison souhaitée : 30/03/2025  
+
+
+6. ESTIMATION DU BUDGET
+----------------------
+- Matériel informatique : 18 000 DHS  
+- Licences logicielles : 12 000 DHS  
+- Main-d’œuvre & développement : 30 000 DHS  
+- Formation du personnel : 8 000 DHS  
+
+💰 **Budget total estimé : 68 000 DHS**
+
+
+7. RISQUES POTENTIELS
+----------------------
+- Retards dus au manque de données financières complètes  
+- Non-conformité aux normes réglementaires  
+- Risques de sécurité liés à la manipulation de données sensibles  
+
+
+8. REMARQUES DE L’EMPLOYÉ
+----------------------
+Le projet doit être prioritaire car il permettra d'améliorer
+la planification budgétaire et la rapidité des opérations.
