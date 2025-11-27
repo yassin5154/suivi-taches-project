@@ -115,7 +115,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { 
       label: 'Mes tâches', 
       icon: 'assignment', 
-      route: '/employe/tasks', 
+      route: '/employe/suivi-taches', 
       roles: ['EMPLOYE'] 
     },
     { 

@@ -1,6 +1,7 @@
 package ma.ac.uir.marchepublic.suivi_marche.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class Besoin {
 
     @ManyToOne
     @JoinColumn(name = "employe_id")
+    @JsonIgnoreProperties({"besoins", "password", "hibernateLazyInitializer", "handler"})
     private Employe employe;
 
     private String statut = "EN_ATTENTE"; // EN_ATTENTE, ACCEPTE, REFUSE
@@ -34,7 +36,7 @@ public class Besoin {
     private LocalDate validationDate;
 
     @OneToMany(mappedBy = "besoin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonIgnoreProperties({"besoin", "hibernateLazyInitializer", "handler"})
     private List<Tache> taches = new ArrayList<>();
 
     public Besoin() {

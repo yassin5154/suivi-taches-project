@@ -20,6 +20,19 @@ export interface Besoin {
   statut: string;
 }
 
+interface Tache {
+  id: number;
+  titre: string;
+  description: string;
+  duree?: string;
+  dureeEstimee?: string;
+  dateFinale?: string;
+  dateLimite?: string;
+  statut?: string;
+  statutValidation?: 'ACCEPTE' | 'REFUSE';
+  motifRefus?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,12 +44,12 @@ export class EmployeService {
 
   // File upload method - FIX: Use { responseType: 'text' }
   uploadFile(formData: FormData): Observable<string> {
-    return this.http.post(`${this.uploadUrl}/cps`, formData, { 
-      responseType: 'text' 
-    }).pipe(
-      catchError(this.handleError)
-    );
-  }
+  return this.http.post(`${this.uploadUrl}/cps`, formData, { 
+    responseType: 'text' 
+  }).pipe(
+    catchError(this.handleError)
+  );
+}
 
   // Create besoin with JSON data
   createBesoin(employeId: number, besoinData: any): Observable<Besoin> {
@@ -99,5 +112,54 @@ export class EmployeService {
     }
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
+  }
+
+  // NOUVEAU: Obtenir les besoins du service
+  getBesoinsService(employeId: number): Observable<Besoin[]> {
+    return this.http.get<Besoin[]>(`${this.apiUrl}/${employeId}/besoins-service`)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+   // NOUVEAU: Modifier un besoin
+  modifierBesoin(employeId: number, besoinId: number, besoinData: any): Observable<Besoin> {
+    return this.http.put<Besoin>(`${this.apiUrl}/${employeId}/besoin/${besoinId}`, besoinData)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  // NOUVEAU: Signaler une tâche
+  signalerTache(employeId: number, besoinId: number, signalement: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${employeId}/besoin/${besoinId}/signaler-tache`, signalement)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  // NOUVEAU: Valider une tâche
+  validerTache(employeId: number, besoinId: number, validation: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${employeId}/besoin/${besoinId}/valider-tache`, validation)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  // NOUVEAU: Obtenir le contenu du fichier CPS
+  getCpsContent(besoinId: number): Observable<string> {
+    return this.http.get(`${environment.apiUrl}/files/besoin/${besoinId}/cps`, { 
+      responseType: 'text' 
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // NOUVEAU: Obtenir les tâches d'un besoin
+  getTachesByBesoinId(besoinId: number): Observable<Tache[]> {
+    return this.http.get<Tache[]>(`${this.apiUrl}/besoin/${besoinId}/taches`)
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 }

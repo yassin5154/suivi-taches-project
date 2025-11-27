@@ -110,6 +110,28 @@
         </div>
       </div>
 
+      <!-- Ajouter cette section après l'affichage du CPS dans validation-taches.component.html -->
+<div *ngIf="signalements.length > 0" class="signalements-alert">
+  <div class="signalements-header">
+    <i class="icon-alert"></i>
+    <h3>Signalements des Employés</h3>
+    <span class="signalements-count">{{ signalements.length }} signalement(s)</span>
+  </div>
+  
+  <div class="signalements-list">
+    <div *ngFor="let signalement of signalements" class="signalement-alert">
+      <div class="signalement-info">
+        <span class="employe-name">{{ signalement.employe.nom }} {{ signalement.employe.prenom }}</span>
+        <span class="signalement-date">{{ formatDateTime(signalement.dateSignalement) }}</span>
+      </div>
+      <div class="signalement-content">
+        <span class="tache-reference">Tâche {{ signalement.numeroTache }}</span>
+        <p class="signalement-message">{{ signalement.message }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
       <!-- Action Buttons pour le Besoin -->
       <div class="action-buttons" *ngIf="selectedBesoin.statut === 'EN_ATTENTE'">
         <button class="btn-accept" (click)="acceptBesoin(selectedBesoin.id)">

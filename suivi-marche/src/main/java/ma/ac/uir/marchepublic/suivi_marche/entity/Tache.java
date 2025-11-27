@@ -30,8 +30,7 @@ public class Tache {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "besoin_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @JsonIgnore
+    @JsonIgnoreProperties({"taches", "employe", "hibernateLazyInitializer", "handler"})
     private Besoin besoin;
 
     public Tache() {

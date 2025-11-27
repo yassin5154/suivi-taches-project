@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChefServiceService, Besoin, Tache, ValidationRequest } from '../../../../core/services/chefservice.service';
+import { SignalementService, Signalement } from '../../../../core/services/signalement.service';
 
 @Component({
   selector: 'app-validation-taches',
@@ -13,20 +14,12 @@ import { ChefServiceService, Besoin, Tache, ValidationRequest } from '../../../.
 })
 export class ValidationTachesComponent implements OnInit {
 
-  showAddTaskForm: boolean = false;
-  newTask: any = {
-    titre: '',
-    description: '',
-    dateFinale: '',
-    dureeEstimee: '',
-    dateLimite: ''
-  };
-
   // Data properties
   besoins: Besoin[] = [];
   selectedBesoin: Besoin | null = null;
   cpsContent: string = '';
   taches: Tache[] = [];
+  signalements: Signalement[] = []; // Nouveau: Liste des signalements
 
   // UI state properties
   showTasksSection: boolean = false;
@@ -35,18 +28,32 @@ export class ValidationTachesComponent implements OnInit {
   refuseType: 'besoin' | 'tache' = 'besoin';
   selectedBesoinId: number | null = null;
   selectedTacheId: number | null = null;
+  showAddTaskForm: boolean = false;
 
   // Loading states
   isLoadingBesoins: boolean = false;
   isLoadingCps: boolean = false;
   isLoadingTaches: boolean = false;
+  isLoadingSignalements: boolean = false; // Nouveau: Chargement signalements
 
   // Notification
   showNotification: boolean = false;
   notificationMessage: string = '';
   notificationType: 'success' | 'error' = 'success';
 
-  constructor(private chefServiceService: ChefServiceService) {}
+  // Nouvelle tâche
+  newTask: any = {
+    titre: '',
+    description: '',
+    dateFinale: '',
+    dureeEstimee: '',
+    dateLimite: ''
+  };
+
+  constructor(
+    private chefServiceService: ChefServiceService,
+    private signalementService: SignalementService // Ajouter le service signalement
+  ) {}
 
   ngOnInit(): void {
     console.log('🔄 Initialisation du composant ValidationTachesComponent');
@@ -93,9 +100,13 @@ export class ValidationTachesComponent implements OnInit {
     this.selectedBesoin = besoin;
     this.cpsContent = ''; // Reset CPS content
     this.taches = []; // Reset tasks
+    this.signalements = []; // Reset signalements
 
     // Charger automatiquement le contenu CPS
     this.loadCpsFile(besoin.id);
+
+    // Charger les signalements pour ce besoin
+    this.loadSignalements(besoin.id);
 
     // If besoin is already accepted, load tasks
     if (besoin.statut === 'ACCEPTE') {
@@ -137,6 +148,29 @@ export class ValidationTachesComponent implements OnInit {
         
         this.isLoadingCps = false;
         this.showErrorNotification('Erreur lors du chargement du fichier CPS: ' + error.message);
+      }
+    });
+  }
+
+  /**
+   * Load signalements for a besoin
+   */
+  loadSignalements(besoinId: number): void {
+    this.isLoadingSignalements = true;
+    this.signalements = [];
+
+    console.log('📢 Chargement des signalements pour le besoin:', besoinId);
+
+    this.signalementService.getSignalementsParBesoin(besoinId).subscribe({
+      next: (signalements: Signalement[]) => {
+        this.signalements = signalements;
+        this.isLoadingSignalements = false;
+        console.log('✅ Signalements chargés avec succès:', signalements.length);
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors du chargement des signalements:', error);
+        this.isLoadingSignalements = false;
+        // Ne pas afficher d'erreur à l'utilisateur pour les signalements
       }
     });
   }
@@ -281,72 +315,151 @@ export class ValidationTachesComponent implements OnInit {
    * Accept a task
    */
   acceptTache(tache: Tache): void {
-  if (!this.canAcceptTache(tache)) {
-    this.showErrorNotification('Veuillez remplir tous les champs obligatoires (titre, date finale, durée estimée)');
-    return;
-  }
-
-  if (!confirm('Êtes-vous sûr de vouloir valider cette tâche ?')) {
-    return;
-  }
-
-  console.log('✅ Acceptation de la tâche:', tache.id);
-
-  const validationRequest: ValidationRequest = {
-    valide: true,
-    titre: tache.titre,
-    dateFinale: tache.dateFinale,
-    dureeEstimee: tache.dureeEstimee,
-    dateLimite: tache.dateLimite
-  };
-
-  this.chefServiceService.validerTache(tache.id, validationRequest).subscribe({
-    next: (updatedTache: Tache) => {
-      const tacheIndex = this.taches.findIndex(t => t.id === tache.id);
-      if (tacheIndex !== -1) {
-        this.taches[tacheIndex] = updatedTache;
-      }
-      this.showSuccessNotification('Tâche validée avec succès');
-    },
-    error: (error) => {
-      console.error('❌ Erreur lors de la validation de la tâche:', error);
-      this.showErrorNotification('Erreur lors de la validation de la tâche: ' + error.message);
+    if (!this.canAcceptTache(tache)) {
+      this.showErrorNotification('Veuillez remplir tous les champs obligatoires (titre, date finale, durée estimée)');
+      return;
     }
-  });
-}
+
+    if (!confirm('Êtes-vous sûr de vouloir valider cette tâche ?')) {
+      return;
+    }
+
+    console.log('✅ Acceptation de la tâche:', tache.id);
+
+    const validationRequest: ValidationRequest = {
+      valide: true,
+      titre: tache.titre,
+      dateFinale: tache.dateFinale,
+      dureeEstimee: tache.dureeEstimee,
+      dateLimite: tache.dateLimite
+    };
+
+    this.chefServiceService.validerTache(tache.id, validationRequest).subscribe({
+      next: (updatedTache: Tache) => {
+        const tacheIndex = this.taches.findIndex(t => t.id === tache.id);
+        if (tacheIndex !== -1) {
+          this.taches[tacheIndex] = updatedTache;
+        }
+        this.showSuccessNotification('Tâche validée avec succès');
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors de la validation de la tâche:', error);
+        this.showErrorNotification('Erreur lors de la validation de la tâche: ' + error.message);
+      }
+    });
+  }
 
   /**
    * Refuse a task with reason
    */
   refuseTache(tacheId: number, reason: string): void {
-  const tache = this.taches.find(t => t.id === tacheId);
-  if (!tache) return;
+    const tache = this.taches.find(t => t.id === tacheId);
+    if (!tache) return;
 
-  console.log('❌ Refus de la tâche:', tacheId, 'Raison:', reason);
+    console.log('❌ Refus de la tâche:', tacheId, 'Raison:', reason);
 
-  const validationRequest: ValidationRequest = {
-    valide: false,
-    motifRefus: reason,
-    titre: tache.titre,
-    dateFinale: tache.dateFinale,
-    dureeEstimee: tache.dureeEstimee,
-    dateLimite: tache.dateLimite
-  };
+    const validationRequest: ValidationRequest = {
+      valide: false,
+      motifRefus: reason,
+      titre: tache.titre,
+      dateFinale: tache.dateFinale,
+      dureeEstimee: tache.dureeEstimee,
+      dateLimite: tache.dateLimite
+    };
 
-  this.chefServiceService.validerTache(tacheId, validationRequest).subscribe({
-    next: (updatedTache: Tache) => {
-      const tacheIndex = this.taches.findIndex(t => t.id === tacheId);
-      if (tacheIndex !== -1) {
-        this.taches[tacheIndex] = updatedTache;
+    this.chefServiceService.validerTache(tacheId, validationRequest).subscribe({
+      next: (updatedTache: Tache) => {
+        const tacheIndex = this.taches.findIndex(t => t.id === tacheId);
+        if (tacheIndex !== -1) {
+          this.taches[tacheIndex] = updatedTache;
+        }
+        this.showSuccessNotification('Tâche refusée avec succès');
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors du refus de la tâche:', error);
+        this.showErrorNotification('Erreur lors du refus de la tâche: ' + error.message);
       }
-      this.showSuccessNotification('Tâche refusée avec succès');
-    },
-    error: (error) => {
-      console.error('❌ Erreur lors du refus de la tâche:', error);
-      this.showErrorNotification('Erreur lors du refus de la tâche: ' + error.message);
+    });
+  }
+
+  /**
+   * Afficher/masquer le formulaire d'ajout de tâche
+   */
+  toggleAddTaskForm(): void {
+    this.showAddTaskForm = !this.showAddTaskForm;
+    if (!this.showAddTaskForm) {
+      this.resetNewTaskForm();
     }
-  });
-}
+    console.log('📋 Formulaire ajout tâche:', this.showAddTaskForm ? 'ouvert' : 'fermé');
+  }
+
+  /**
+   * Réinitialiser le formulaire de nouvelle tâche
+   */
+  resetNewTaskForm(): void {
+    this.newTask = {
+      titre: '',
+      description: '',
+      dateFinale: '',
+      dureeEstimee: '',
+      dateLimite: ''
+    };
+  }
+
+  /**
+   * Vérifier si on peut ajouter une nouvelle tâche
+   */
+  canAddNewTask(): boolean {
+    return this.newTask.titre && 
+           this.newTask.titre.trim().length > 0 && 
+           this.newTask.dateFinale && 
+           this.newTask.dureeEstimee &&
+           this.newTask.dureeEstimee.trim().length > 0;
+  }
+
+  /**
+   * Ajouter une nouvelle tâche
+   */
+  addNewTask(): void {
+    if (!this.selectedBesoin) {
+      this.showErrorNotification('Aucun besoin sélectionné');
+      return;
+    }
+
+    if (!this.canAddNewTask()) {
+      this.showErrorNotification('Veuillez remplir tous les champs obligatoires (titre, date finale, durée estimée)');
+      return;
+    }
+
+    console.log('➕ Ajout nouvelle tâche pour besoin:', this.selectedBesoin.id);
+
+    this.chefServiceService.creerNouvelleTache(this.selectedBesoin.id, this.newTask).subscribe({
+      next: (tache: Tache) => {
+        // Ajouter la nouvelle tâche à la liste
+        this.taches.push(tache);
+        
+        // Réinitialiser le formulaire
+        this.resetNewTaskForm();
+        this.showAddTaskForm = false;
+        
+        console.log('✅ Nouvelle tâche ajoutée avec succès:', tache.titre);
+        this.showSuccessNotification('Tâche ajoutée avec succès');
+      },
+      error: (error) => {
+        console.error('❌ Erreur lors de l\'ajout de la tâche:', error);
+        this.showErrorNotification('Erreur lors de l\'ajout de la tâche: ' + error.message);
+      }
+    });
+  }
+
+  /**
+   * Annuler l'ajout de tâche
+   */
+  cancelAddTask(): void {
+    this.resetNewTaskForm();
+    this.showAddTaskForm = false;
+    console.log('❌ Ajout de tâche annulé');
+  }
 
   /**
    * Get chef ID from authentication service or local storage
@@ -421,6 +534,30 @@ export class ValidationTachesComponent implements OnInit {
   }
 
   /**
+   * Format date and time for display
+   */
+  formatDateTime(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  /**
+   * Check if a task can be validated
+   */
+  canAcceptTache(tache: Tache): boolean {
+    const hasValidTitre = typeof tache.titre === 'string' && tache.titre.trim().length > 0;
+    const hasValidDateFinale = !!tache.dateFinale;
+    const hasValidDuree = typeof tache.dureeEstimee === 'string' && tache.dureeEstimee.trim().length > 0;
+    return hasValidTitre && hasValidDateFinale && hasValidDuree;
+  }
+
+  /**
    * Show success notification
    */
   private showSuccessNotification(message: string): void {
@@ -471,6 +608,7 @@ export class ValidationTachesComponent implements OnInit {
     this.selectedBesoin = null;
     this.cpsContent = '';
     this.taches = [];
+    this.signalements = [];
     this.showTasksSection = false;
     this.loadBesoins();
   }
@@ -508,92 +646,4 @@ export class ValidationTachesComponent implements OnInit {
         return `${baseClass} status-default`;
     }
   }
-
-  canAcceptTache(tache: Tache): boolean {
-    // Ensure we return a boolean and guard against non-string values before calling trim()
-    const hasValidTitre = typeof tache.titre === 'string' && tache.titre.trim().length > 0;
-    const hasValidDateFinale = !!tache.dateFinale;
-    const hasValidDuree = typeof tache.dureeEstimee === 'string' && tache.dureeEstimee.trim().length > 0;
-    return hasValidTitre && hasValidDateFinale && hasValidDuree;
-}
-
-/**
- * Afficher/masquer le formulaire d'ajout de tâche
- */
-toggleAddTaskForm(): void {
-  this.showAddTaskForm = !this.showAddTaskForm;
-  if (!this.showAddTaskForm) {
-    this.resetNewTaskForm();
-  }
-  console.log('📋 Formulaire ajout tâche:', this.showAddTaskForm ? 'ouvert' : 'fermé');
-}
-
-/**
- * Réinitialiser le formulaire de nouvelle tâche
- */
-resetNewTaskForm(): void {
-  this.newTask = {
-    titre: '',
-    description: '',
-    dateFinale: '',
-    dureeEstimee: '',
-    dateLimite: ''
-  };
-}
-
-/**
- * Vérifier si on peut ajouter une nouvelle tâche
- */
-canAddNewTask(): boolean {
-  return this.newTask.titre && 
-         this.newTask.titre.trim().length > 0 && 
-         this.newTask.dateFinale && 
-         this.newTask.dureeEstimee &&
-         this.newTask.dureeEstimee.trim().length > 0;
-}
-
-/**
- * Ajouter une nouvelle tâche
- */
-addNewTask(): void {
-  if (!this.selectedBesoin) {
-    this.showErrorNotification('Aucun besoin sélectionné');
-    return;
-  }
-
-  if (!this.canAddNewTask()) {
-    this.showErrorNotification('Veuillez remplir tous les champs obligatoires (titre, date finale, durée estimée)');
-    return;
-  }
-
-  console.log('➕ Ajout nouvelle tâche pour besoin:', this.selectedBesoin.id);
-
-  this.chefServiceService.creerNouvelleTache(this.selectedBesoin.id, this.newTask).subscribe({
-    next: (tache: Tache) => {
-      // Ajouter la nouvelle tâche à la liste
-      this.taches.push(tache);
-      
-      // Réinitialiser le formulaire
-      this.resetNewTaskForm();
-      this.showAddTaskForm = false;
-      
-      console.log('✅ Nouvelle tâche ajoutée avec succès:', tache.titre);
-      this.showSuccessNotification('Tâche ajoutée avec succès');
-    },
-    error: (error) => {
-      console.error('❌ Erreur lors de l\'ajout de la tâche:', error);
-      this.showErrorNotification('Erreur lors de l\'ajout de la tâche: ' + error.message);
-    }
-  });
-}
-
-/**
- * Annuler l'ajout de tâche
- */
-cancelAddTask(): void {
-  this.resetNewTaskForm();
-  this.showAddTaskForm = false;
-  console.log('❌ Ajout de tâche annulé');
-}
-
 }

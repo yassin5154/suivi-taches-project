@@ -3,6 +3,7 @@ package ma.ac.uir.marchepublic.suivi_marche.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
@@ -12,7 +13,9 @@ public class Employe extends Utilisateur {
 
     private String service;
     private String poste;
+
     @OneToMany(mappedBy = "employe", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"employe"})
     private List<Besoin> besoins = new ArrayList<>();
 
     public Employe() {
