@@ -122,4 +122,43 @@ public class ChefServiceController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    // NOUVEAU: Obtenir les statistiques globales du service
+    @GetMapping("/{chefServiceId}/analytics/kpis")
+    public ResponseEntity<Map<String, Object>> getServiceAnalytics(@PathVariable("chefServiceId") String chefServiceId) {
+        try {
+            System.out.println("📊 GET Analytics KPIs pour chef: " + chefServiceId);
+            Map<String, Object> analytics = chefServiceService.getServiceAnalytics(chefServiceId);
+            return ResponseEntity.ok(analytics);
+        } catch (Exception e) {
+            System.err.println("❌ Erreur GET analytics: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // NOUVEAU: Obtenir les détails des tâches pour le tableau
+    @GetMapping("/{chefServiceId}/analytics/tasks")
+    public ResponseEntity<List<Map<String, Object>>> getTasksDetails(@PathVariable("chefServiceId") String chefServiceId) {
+        try {
+            System.out.println("📋 GET Tasks Details pour chef: " + chefServiceId);
+            List<Map<String, Object>> tasks = chefServiceService.getTasksDetails(chefServiceId);
+            return ResponseEntity.ok(tasks);
+        } catch (Exception e) {
+            System.err.println("❌ Erreur GET tasks details: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // NOUVEAU: Obtenir les données pour les graphiques
+    @GetMapping("/{chefServiceId}/analytics/chart-data")
+    public ResponseEntity<Map<String, Object>> getChartData(@PathVariable("chefServiceId") String chefServiceId) {
+        try {
+            System.out.println("📈 GET Chart Data pour chef: " + chefServiceId);
+            Map<String, Object> chartData = chefServiceService.getChartData(chefServiceId);
+            return ResponseEntity.ok(chartData);
+        } catch (Exception e) {
+            System.err.println("❌ Erreur GET chart data: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

@@ -1,0 +1,100 @@
+====================================================
+        CAHIER DE PRESCRIPTIONS SPÉCIALES (CPS)
+Projet : Système de Gestion Budgétaire et Prévisionnelle
+                Département des Finances
+====================================================
+
+1. OBJECTIF DU PROJET
+----------------------
+Mettre en place une plateforme digitale permettant :
+
+le suivi en temps réel de l’exécution budgétaire,
+
+la prévision des dépenses et recettes futures,
+
+l’alerte automatique en cas de dépassement de budget,
+
+la génération de tableaux de bord financiers pour la prise de décision.
+
+L’objectif final est d’optimiser la gestion budgétaire, améliorer la planification financière et renforcer la prise de décision stratégique.
+
+
+2. TÂCHES À RÉALISER
+----------------------
+
+Tâche 1 :
+    Titre : Importation et consolidation des budgets
+    Description : Intégrer les budgets des différents départements et les consolider pour une vision globale.
+    Durée estimée : 5 jours
+    Date limite : 10/05/2025
+
+Tâche 2 :
+    Titre : Développement du module de prévision
+    Description : Créer un moteur de prévision basé sur les données historiques et les
+                  tendances actuelles pour estimer les dépenses et recettes futures.
+    Durée estimée : 7 jours
+    Date limite : 17/05/2025
+
+Tâche 3 :
+    Titre : Système d’alerte budgétaire
+    Description : Mettre en place un module qui envoie des alertes automatiques en cas
+                  de dépassement du budget ou d’écart significatif par rapport aux prévisions
+    Durée estimée : 4 jours
+    Date limite : 21/05/2025
+
+Tâche 4 :
+    Titre : Création de tableaux de bord financiers
+    Description : Générer des dashboards interactifs incluant
+    Durée estimée : 6 jours
+    Date limite : 27/05/2025
+
+Tâche 5 :
+    Titre : Test et validation du système
+    Description : Vérifier la conformité des données et la fiabilité des prévisions budgétaires.
+    Durée estimée : 3 jours
+    Date limite : 30/05/2025
+
+
+
+3. MATÉRIELS REQUIS
+----------------------
+- Serveur sécurisé pour hébergement des données budgétaires 
+- Disques durs cryptés pour sauvegarde et transfert des données sensibles  
+- Postes de travail pour les gestionnaires financiers  
+- Kit de sauvegarde automatique
+
+
+4. LICENCES LOGICIELS REQUISES
+----------------------
+- Licence Microsoft SQL Server ou PostgreSQL 
+- Licence Power BI Pro ou Tableau
+- Logiciel de chiffrement approuvé par l’institution 
+- Antivirus institutionnel à jour
+
+5. DURÉE TOTALE DU PROJET
+----------------------
+Durée estimée globale : 25 à 28 jours  
+Date de livraison souhaitée : 02/06/2025
+
+
+6. ESTIMATION DU BUDGET
+----------------------
+- Matériel informatique : 20 000 DHS
+- Licences logicielles : 12 000 DHS 
+- Développement & intégration : 35 000 DHS
+- Formation des utilisateurs : 8 000 DHS
+
+💰 **Budget total estimé : 75 000 DHS**
+
+
+7. RISQUES POTENTIELS
+----------------------
+- Données budgétaires incomplètes ou erronées 
+- Non-conformité aux normes réglementaires  
+- Risques de sécurité liés à la manipulation de données sensibles  
+
+
+8. REMARQUES DE L’EMPLOYÉ
+----------------------
+Le projet doit être prioritaire car il permettra d'améliorer
+la planification budgétaire et la rapidité des opérations.

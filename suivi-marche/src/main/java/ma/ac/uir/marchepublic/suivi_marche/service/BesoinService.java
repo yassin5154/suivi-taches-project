@@ -105,4 +105,22 @@ public class BesoinService {
 
         return besoinRepository.save(besoin);
     }
+
+    // NOUVEAU: Obtenir les besoins acceptés du service
+    public List<Besoin> getBesoinsAcceptesDuService(String employeId) {
+        Long employeIdLong = Long.parseLong(employeId);
+        Employe employe = (Employe) utilisateurRepository.findById(employeIdLong)
+                .orElseThrow(() -> new RuntimeException("Employe not found with id: " + employeId));
+
+        // Récupérer les besoins acceptés du service
+        List<Besoin> besoins = besoinRepository.findByServiceAndStatut(employe.getService(), "ACCEPTE");
+
+        // Charger les tâches pour chaque besoin
+        for (Besoin besoin : besoins) {
+            List<Tache> taches = tacheRepository.findByBesoinId(besoin.getId());
+            besoin.setTaches(taches);
+        }
+
+        return besoins;
+    }
 }

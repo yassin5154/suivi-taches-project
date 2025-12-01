@@ -162,4 +162,20 @@ export class EmployeService {
         catchError(this.handleError)
       );
   }
+
+  // NOUVEAU: Obtenir les besoins acceptés du service
+getBesoinsAcceptes(employeId: number): Observable<Besoin[]> {
+  return this.http.get<Besoin[]>(`${this.apiUrl}/${employeId}/besoins-acceptes`)
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// NOUVEAU: Marquer une tâche comme terminée
+terminerTache(tacheId: number): Observable<any> {
+  return this.http.post(`${this.apiUrl}/tache/${tacheId}/terminer`, {})
+    .pipe(
+      catchError(this.handleError)
+    );
+}
 }

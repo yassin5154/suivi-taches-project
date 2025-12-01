@@ -54,4 +54,17 @@ public class TacheService {
         System.out.println("Motif: " + signalement.getMotif());
     }
 
+    // NOUVEAU: Marquer une tâche comme terminée
+    public void terminerTache(Long tacheId) {
+        Tache tache = tacheRepository.findById(tacheId)
+                .orElseThrow(() -> new RuntimeException("Tâche non trouvée"));
+
+        if ("TERMINEE".equals(tache.getStatut())) {
+            throw new RuntimeException("Cette tâche est déjà terminée");
+        }
+
+        tache.setStatut("TERMINEE");
+        tacheRepository.save(tache);
+    }
+
 }

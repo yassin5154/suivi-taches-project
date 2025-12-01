@@ -24,17 +24,13 @@ public class FileService {
             System.out.println("📖 Lecture du fichier CPS: " + filename);
             System.out.println("📂 Répertoire d'upload configuré: " + uploadDir);
 
-            // Construire le chemin complet
             Path filePath = Paths.get(uploadDir, filename);
             System.out.println("📍 Chemin complet construit: " + filePath.toAbsolutePath());
 
-            // Vérifier si le fichier existe
             if (!Files.exists(filePath)) {
-                // Afficher des informations de diagnostic
                 System.err.println("❌ Fichier introuvable: " + filePath.toAbsolutePath());
                 System.err.println("📂 Répertoire de travail actuel: " + Paths.get("").toAbsolutePath());
 
-                // Lister les fichiers dans le dossier uploads
                 Path uploadPath = Paths.get(uploadDir);
                 if (Files.exists(uploadPath)) {
                     System.err.println("📁 Contenu du dossier uploads:");
@@ -53,95 +49,103 @@ public class FileService {
                 throw new IOException("Fichier introuvable: " + filename);
             }
 
-            // Lire toutes les lignes du fichier
             List<String> lignes = Files.readAllLines(filePath);
             System.out.println("✅ Fichier lu avec succès, nombre de lignes: " + lignes.size());
 
             boolean dansSectionTaches = false;
             String titreTacheCourante = null;
             StringBuilder descriptionTacheCourante = new StringBuilder();
+            String dureeEstimeeCourante = null;
             boolean enDescription = false;
-            int numeroTache = 0;
 
             for (int i = 0; i < lignes.size(); i++) {
-                String ligne = lignes.get(i).trim();
+                String ligne = lignes.get(i);
+                String ligneTrim = ligne.trim();
 
                 // Détecter le début de la section des tâches
-                if ((ligne.contains("2.") && ligne.toUpperCase().contains("TÂCHES")) ||
-                        ligne.toUpperCase().contains("TÂCHES À RÉALISER")) {
+                if ((ligneTrim.contains("2.") && ligneTrim.toUpperCase().contains("TÂCHES")) ||
+                        ligneTrim.toUpperCase().contains("TÂCHES À RÉALISER")) {
                     dansSectionTaches = true;
-                    System.out.println("✅ Section tâches détectée: " + ligne);
+                    System.out.println("✅ Section tâches détectée: " + ligneTrim);
                     continue;
                 }
 
                 if (dansSectionTaches) {
                     // Arrêter si on arrive à une autre section majeure
-                    if (ligne.startsWith("3.") ||
-                            ligne.toUpperCase().contains("MATÉRIELS REQUIS") ||
-                            ligne.toUpperCase().contains("LICENCES") ||
-                            ligne.toUpperCase().contains("DURÉE TOTALE") ||
-                            ligne.toUpperCase().contains("BUDGET") ||
-                            ligne.toUpperCase().contains("RISQUES") ||
-                            ligne.toUpperCase().contains("REMARQUES")) {
-                        System.out.println("⏹️ Fin de la section tâches détectée: " + ligne);
+                    if (ligneTrim.matches("^\\d+\\..*") &&
+                            (ligneTrim.toUpperCase().contains("MATÉRIELS") ||
+                                    ligneTrim.toUpperCase().contains("LICENCES") ||
+                                    ligneTrim.toUpperCase().contains("DURÉE TOTALE") ||
+                                    ligneTrim.toUpperCase().contains("BUDGET") ||
+                                    ligneTrim.toUpperCase().contains("RISQUES") ||
+                                    ligneTrim.toUpperCase().contains("REMARQUES"))) {
+                        System.out.println("⏹️ Fin de la section tâches détectée: " + ligneTrim);
 
                         // Sauvegarder la dernière tâche en cours
-                        sauvegarderTacheSiExistante(taches, titreTacheCourante, descriptionTacheCourante, ++numeroTache);
+                        if (titreTacheCourante != null && !titreTacheCourante.isEmpty()) {
+                            sauvegarderTache(taches, titreTacheCourante, descriptionTacheCourante, dureeEstimeeCourante);
+                        }
                         break;
                     }
 
                     // Détecter le début d'une nouvelle tâche (format: "Tâche X :")
-                    if (ligne.matches("^Tâche\\s+\\d+\\s*:.*")) {
+                    if (ligneTrim.matches("^Tâche\\s+\\d+\\s*:.*")) {
                         // Sauvegarder la tâche précédente si elle existe
-                        sauvegarderTacheSiExistante(taches, titreTacheCourante, descriptionTacheCourante, ++numeroTache);
+                        if (titreTacheCourante != null && !titreTacheCourante.isEmpty()) {
+                            sauvegarderTache(taches, titreTacheCourante, descriptionTacheCourante, dureeEstimeeCourante);
+                        }
 
                         // Réinitialiser pour la nouvelle tâche
                         titreTacheCourante = null;
                         descriptionTacheCourante = new StringBuilder();
+                        dureeEstimeeCourante = null;
                         enDescription = false;
-                        System.out.println("🆕 Nouvelle tâche détectée: " + ligne);
+                        System.out.println("🆕 Nouvelle tâche détectée: " + ligneTrim);
                         continue;
                     }
 
-                    // Détecter le titre de la tâche
-                    if (ligne.startsWith("Titre :")) {
-                        titreTacheCourante = ligne.replaceFirst("^Titre\\s*:", "").trim();
+                    // Détecter le titre de la tâche (avec ou sans indentation)
+                    if (ligneTrim.startsWith("Titre :")) {
+                        titreTacheCourante = ligneTrim.replaceFirst("^Titre\\s*:", "").trim();
                         enDescription = false;
                         System.out.println("🏷️  Titre de tâche trouvé: " + titreTacheCourante);
                         continue;
                     }
 
                     // Détecter le début de la description
-                    if (ligne.startsWith("Description :")) {
-                        String description = ligne.replaceFirst("^Description\\s*:", "").trim();
+                    if (ligneTrim.startsWith("Description :")) {
+                        String description = ligneTrim.replaceFirst("^Description\\s*:", "").trim();
                         if (!description.isEmpty()) {
-                            if (descriptionTacheCourante.length() > 0) {
-                                descriptionTacheCourante.append(" ");
-                            }
                             descriptionTacheCourante.append(description);
                         }
                         enDescription = true;
+                        System.out.println("📝 Description détectée: " + description);
                         continue;
                     }
 
-                    // Si on est en train de lire une description (lignes indentées)
+                    // Détecter la durée estimée
+                    if (ligneTrim.startsWith("Durée estimée :")) {
+                        dureeEstimeeCourante = ligneTrim.replaceFirst("^Durée estimée\\s*:", "").trim();
+                        enDescription = false;
+                        System.out.println("⏱️ Durée estimée détectée: " + dureeEstimeeCourante);
+                        continue;
+                    }
+
+                    // Si on est en train de lire une description
                     if (enDescription && titreTacheCourante != null) {
                         // Vérifier si c'est une ligne de description (indentée) et pas un nouveau champ
-                        if (!ligne.isEmpty() &&
-                                !ligne.startsWith("Durée estimée :") &&
-                                !ligne.startsWith("Date limite :") &&
-                                !ligne.matches("^Tâche\\s+\\d+\\s*:.*") &&
-                                !ligne.startsWith("Titre :")) {
+                        if (!ligneTrim.isEmpty() &&
+                                !ligneTrim.startsWith("Durée estimée :") &&
+                                !ligneTrim.startsWith("Date limite :") &&
+                                !ligneTrim.matches("^Tâche\\s+\\d+\\s*:.*") &&
+                                !ligneTrim.startsWith("Titre :")) {
 
-                            // Nettoyer la ligne (enlever l'indentation)
-                            String ligneNettoyee = ligne.trim();
-                            if (!ligneNettoyee.isEmpty()) {
-                                if (descriptionTacheCourante.length() > 0) {
-                                    descriptionTacheCourante.append(" ");
-                                }
-                                descriptionTacheCourante.append(ligneNettoyee);
+                            if (descriptionTacheCourante.length() > 0) {
+                                descriptionTacheCourante.append(" ");
                             }
-                        } else if (ligne.startsWith("Durée estimée :") || ligne.startsWith("Date limite :")) {
+                            descriptionTacheCourante.append(ligneTrim);
+                            System.out.println("📝 Ajout à description: " + ligneTrim);
+                        } else if (ligneTrim.startsWith("Durée estimée :") || ligneTrim.startsWith("Date limite :")) {
                             // Arrêter la description quand on arrive aux autres champs
                             enDescription = false;
                         }
@@ -149,8 +153,10 @@ public class FileService {
                 }
             }
 
-            // Sauvegarder la dernière tâche après la boucle (pour la tâche 4)
-            sauvegarderTacheSiExistante(taches, titreTacheCourante, descriptionTacheCourante, ++numeroTache);
+            // Sauvegarder la dernière tâche après la boucle
+            if (titreTacheCourante != null && !titreTacheCourante.isEmpty()) {
+                sauvegarderTache(taches, titreTacheCourante, descriptionTacheCourante, dureeEstimeeCourante);
+            }
 
             System.out.println("✅ Total tâches extraites: " + taches.size());
 
@@ -171,21 +177,17 @@ public class FileService {
     /**
      * Sauvegarde une tâche si elle existe
      */
-    private void sauvegarderTacheSiExistante(List<String> taches, String titre, StringBuilder description, int numeroTache) {
-        if (titre != null && !titre.isEmpty()) {
-            String tacheComplete = titre;
-            if (description.length() > 0) {
-                // Nettoyer la description (supprimer les espaces multiples)
-                String descriptionNettoyee = description.toString().replaceAll("\\s+", " ").trim();
-                tacheComplete += " - " + descriptionNettoyee;
-            }
-            taches.add(tacheComplete);
-            System.out.println("💾 Tâche " + numeroTache + " sauvegardée: " + tacheComplete);
-
-            // Réinitialiser pour éviter les duplications
-            titre = null;
-            description.setLength(0);
+    private void sauvegarderTache(List<String> taches, String titre, StringBuilder description, String dureeEstimee) {
+        String tacheComplete = titre;
+        if (description.length() > 0) {
+            String descriptionNettoyee = description.toString().replaceAll("\\s+", " ").trim();
+            tacheComplete += " - " + descriptionNettoyee;
         }
+        if (dureeEstimee != null && !dureeEstimee.isEmpty()) {
+            tacheComplete += " [Durée: " + dureeEstimee + "]";
+        }
+        taches.add(tacheComplete);
+        System.out.println("💾 Tâche sauvegardée: " + tacheComplete);
     }
 
     public String lireContenuFichierCPS(String filename) throws IOException {
@@ -193,7 +195,6 @@ public class FileService {
             System.out.println("📖 Lecture contenu CPS: " + filename);
             System.out.println("📂 Répertoire d'upload: " + uploadDir);
 
-            // Construire le chemin complet
             Path filePath = Paths.get(uploadDir, filename);
             System.out.println("📍 Chemin complet: " + filePath.toAbsolutePath());
 

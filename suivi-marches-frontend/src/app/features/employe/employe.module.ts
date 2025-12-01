@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { EmployeRoutingModule } from './employe-routing.module';
 import { CreateNeedComponent } from './pages/create-need/create-need.component';
 import { SuiviTachesComponent } from './pages/suivi-taches/suivi-taches.component';
-import { NotificationsComponent } from './pages/notifications/notifications.component';
+import { SuiviComponent } from './pages/suivi/suivi.component';
 import { TacheCardComponent } from './components/tache-card/tache-card.component';
 
 @NgModule({

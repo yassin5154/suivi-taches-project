@@ -46,6 +46,31 @@ export interface ValidationRequest {
   dateLimite?: string; // Nouveau champ
 }
 
+export interface KpiData {
+  totalBesoins: number;
+  totalTaches: number;
+  tachesTerminees: number;
+  tachesRetard: number;
+}
+
+export interface TaskDetail {
+  tache: string;
+  employe: string;
+  besoin: string;
+  dateDebut: string;
+  duree: string;
+  statut: 'EN_COURS' | 'TERMINEE' | 'EN_RETARD';
+  difference: string;
+  progression: number;
+}
+
+export interface ChartData {
+  statusLabels: string[];
+  statusData: number[];
+  employeeLabels: string[];
+  employeeData: number[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -161,6 +186,37 @@ creerNouvelleTache(besoinId: number, tache: Partial<Tache>): Observable<Tache> {
   console.log('📦 Body:', tache);
   
   return this.http.post<Tache>(url, tache, { headers: this.getHeaders() })
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+// Ajouter ces méthodes au service
+getServiceAnalytics(chefId: number): Observable<KpiData> {
+  const url = `${this.apiUrl}/chef-service/${chefId}/analytics/kpis`;
+  console.log('📊 GET Analytics URL:', url);
+  
+  return this.http.get<KpiData>(url, { headers: this.getHeaders() })
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+getTasksDetails(chefId: number): Observable<TaskDetail[]> {
+  const url = `${this.apiUrl}/chef-service/${chefId}/analytics/tasks`;
+  console.log('📋 GET Tasks Details URL:', url);
+  
+  return this.http.get<TaskDetail[]>(url, { headers: this.getHeaders() })
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+getChartData(chefId: number): Observable<ChartData> {
+  const url = `${this.apiUrl}/chef-service/${chefId}/analytics/chart-data`;
+  console.log('📈 GET Chart Data URL:', url);
+  
+  return this.http.get<ChartData>(url, { headers: this.getHeaders() })
     .pipe(
       catchError(this.handleError)
     );

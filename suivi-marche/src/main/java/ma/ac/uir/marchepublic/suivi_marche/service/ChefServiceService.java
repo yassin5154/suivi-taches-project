@@ -12,13 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.temporal.ChronoUnit;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -371,6 +376,219 @@ private String buildFilePath(String filename) {
             return Long.parseLong(id);
         } catch (NumberFormatException e) {
             throw new RuntimeException("ID invalide: " + id);
+        }
+    }
+
+    /**
+     * Récupère les statistiques globales du service
+     */
+    public Map<String, Object> getServiceAnalytics(String chefServiceId) {
+        try {
+            Long chefIdLong = parseId(chefServiceId);
+            ChefService chefService = (ChefService) utilisateurRepository.findById(chefIdLong)
+                    .orElseThrow(() -> new RuntimeException("Chef de service non trouvé"));
+
+            String service = chefService.getService();
+
+            // Récupérer tous les besoins acceptés du service
+            List<Besoin> besoinsAcceptes = besoinRepository.findByServiceAndStatut(service, "ACCEPTE");
+
+            // Calculer les statistiques
+            long totalBesoins = besoinsAcceptes.size();
+            long totalTaches = 0;
+            long tachesTerminees = 0;
+            long tachesEnRetard = 0;
+
+            for (Besoin besoin : besoinsAcceptes) {
+                List<Tache> taches = tacheRepository.findByBesoinId(besoin.getId());
+                totalTaches += taches.size();
+
+                for (Tache tache : taches) {
+                    if ("TERMINEE".equals(tache.getStatut())) {
+                        tachesTerminees++;
+                    } else if (isTacheEnRetard(tache)) {
+                        tachesEnRetard++;
+                    }
+                }
+            }
+
+            Map<String, Object> analytics = new HashMap<>();
+            analytics.put("totalBesoins", totalBesoins);
+            analytics.put("totalTaches", totalTaches);
+            analytics.put("tachesTerminees", tachesTerminees);
+            analytics.put("tachesRetard", tachesEnRetard);
+
+            return analytics;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur calcul analytics: " + e.getMessage());
+            throw new RuntimeException("Erreur lors du calcul des statistiques: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Récupère les détails des tâches pour le tableau
+     */
+    public List<Map<String, Object>> getTasksDetails(String chefServiceId) {
+        try {
+            Long chefIdLong = parseId(chefServiceId);
+            ChefService chefService = (ChefService) utilisateurRepository.findById(chefIdLong)
+                    .orElseThrow(() -> new RuntimeException("Chef de service non trouvé"));
+
+            String service = chefService.getService();
+            List<Besoin> besoinsAcceptes = besoinRepository.findByServiceAndStatut(service, "ACCEPTE");
+
+            List<Map<String, Object>> tasksDetails = new ArrayList<>();
+
+            for (Besoin besoin : besoinsAcceptes) {
+                List<Tache> taches = tacheRepository.findByBesoinId(besoin.getId());
+
+                for (Tache tache : taches) {
+                    Map<String, Object> taskDetail = new HashMap<>();
+                    taskDetail.put("tache", tache.getTitre());
+                    taskDetail.put("employe", besoin.getEmploye().getPrenom() + " " + besoin.getEmploye().getNom());
+                    taskDetail.put("besoin", besoin.getTitre());
+                    taskDetail.put("dateDebut", tache.getDateFinale());
+                    taskDetail.put("duree", tache.getDureeEstimee());
+                    taskDetail.put("statut", getStatutAvecRetard(tache));
+                    taskDetail.put("difference", calculerDifference(tache));
+                    taskDetail.put("progression", calculerProgression(tache));
+
+                    tasksDetails.add(taskDetail);
+                }
+            }
+
+            return tasksDetails;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur récupération détails tâches: " + e.getMessage());
+            throw new RuntimeException("Erreur lors de la récupération des détails: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Récupère les données pour les graphiques
+     */
+    public Map<String, Object> getChartData(String chefServiceId) {
+        try {
+            Long chefIdLong = parseId(chefServiceId);
+            ChefService chefService = (ChefService) utilisateurRepository.findById(chefIdLong)
+                    .orElseThrow(() -> new RuntimeException("Chef de service non trouvé"));
+
+            String service = chefService.getService();
+            List<Besoin> besoinsAcceptes = besoinRepository.findByServiceAndStatut(service, "ACCEPTE");
+
+            // Données pour le graphique de statut
+            Map<String, Long> statutCount = new HashMap<>();
+            statutCount.put("EN_COURS", 0L);
+            statutCount.put("TERMINEE", 0L);
+            statutCount.put("EN_RETARD", 0L);
+
+            // Données pour le graphique des employés
+            Map<String, Long> employePerformance = new HashMap<>();
+
+            for (Besoin besoin : besoinsAcceptes) {
+                List<Tache> taches = tacheRepository.findByBesoinId(besoin.getId());
+                String employeKey = besoin.getEmploye().getPrenom() + " " + besoin.getEmploye().getNom();
+
+                for (Tache tache : taches) {
+                    String statut = getStatutAvecRetard(tache);
+                    statutCount.put(statut, statutCount.get(statut) + 1);
+
+                    if ("TERMINEE".equals(tache.getStatut())) {
+                        employePerformance.put(employeKey,
+                                employePerformance.getOrDefault(employeKey, 0L) + 1);
+                    }
+                }
+            }
+
+            Map<String, Object> chartData = new HashMap<>();
+
+            // Données pour le graphique de statut
+            chartData.put("statusLabels", List.of("En Cours", "Terminées", "En Retard"));
+            chartData.put("statusData", List.of(
+                    statutCount.get("EN_COURS"),
+                    statutCount.get("TERMINEE"),
+                    statutCount.get("EN_RETARD")
+            ));
+
+            // Données pour le graphique des employés
+            chartData.put("employeeLabels", new ArrayList<>(employePerformance.keySet()));
+            chartData.put("employeeData", new ArrayList<>(employePerformance.values()));
+
+            return chartData;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur récupération données graphiques: " + e.getMessage());
+            throw new RuntimeException("Erreur lors de la récupération des données graphiques: " + e.getMessage(), e);
+        }
+    }
+
+    // Méthodes utilitaires
+    private boolean isTacheEnRetard(Tache tache) {
+        if ("TERMINEE".equals(tache.getStatut()) || tache.getDateFinale() == null) {
+            return false;
+        }
+
+        LocalDate dateDebut = tache.getDateFinale();
+        int dureeJours = parseDureeEstimee(tache.getDureeEstimee());
+        LocalDate dateLimite = dateDebut.plusDays(dureeJours);
+
+        return LocalDate.now().isAfter(dateLimite);
+    }
+
+    private String getStatutAvecRetard(Tache tache) {
+        if ("TERMINEE".equals(tache.getStatut())) {
+            return "TERMINEE";
+        }
+        return isTacheEnRetard(tache) ? "EN_RETARD" : "EN_COURS";
+    }
+
+    private String calculerDifference(Tache tache) {
+        if (tache.getDateFinale() == null) return "0j";
+
+        LocalDate dateDebut = tache.getDateFinale();
+        int dureeJours = parseDureeEstimee(tache.getDureeEstimee());
+        LocalDate dateLimite = dateDebut.plusDays(dureeJours);
+
+        if ("TERMINEE".equals(tache.getStatut())) {
+            // Pour les tâches terminées, calculer la différence avec la date actuelle
+            long diff = ChronoUnit.DAYS.between(dateLimite, LocalDate.now());
+            return diff > 0 ? "-" + diff + "j" : "+" + Math.abs(diff) + "j";
+        } else {
+            // Pour les tâches en cours, calculer la différence avec aujourd'hui
+            long diff = ChronoUnit.DAYS.between(LocalDate.now(), dateLimite);
+            return diff >= 0 ? "+" + diff + "j" : "-" + Math.abs(diff) + "j";
+        }
+    }
+
+    private int calculerProgression(Tache tache) {
+        if ("TERMINEE".equals(tache.getStatut())) {
+            return 100;
+        }
+
+        if (tache.getDateFinale() == null) return 0;
+
+        LocalDate dateDebut = tache.getDateFinale();
+        int dureeJours = parseDureeEstimee(tache.getDureeEstimee());
+        LocalDate dateLimite = dateDebut.plusDays(dureeJours);
+
+        long totalJours = ChronoUnit.DAYS.between(dateDebut, dateLimite);
+        long joursEcoules = ChronoUnit.DAYS.between(dateDebut, LocalDate.now());
+
+        if (totalJours <= 0) return 100;
+
+        int progression = (int) ((joursEcoules * 100) / totalJours);
+        return Math.min(Math.max(progression, 0), 100);
+    }
+
+    private int parseDureeEstimee(String dureeEstimee) {
+        if (dureeEstimee == null) return 7;
+        try {
+            String[] parts = dureeEstimee.split(" ");
+            return Integer.parseInt(parts[0]);
+        } catch (Exception e) {
+            return 7;
         }
     }
 }

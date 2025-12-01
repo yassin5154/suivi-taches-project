@@ -76,4 +76,22 @@ public class EmployeController {
     public List<Tache> getTachesByBesoinId(@PathVariable Long besoinId) {
         return tacheRepository.findByBesoinId(besoinId);
     }
+
+    // NOUVEAU: Obtenir les besoins acceptés du service avec leurs tâches
+    @GetMapping("/{employeId}/besoins-acceptes")
+    public List<Besoin> getBesoinsAcceptesDuService(@PathVariable("employeId") String employeId) {
+        return besoinService.getBesoinsAcceptesDuService(employeId);
+    }
+
+    // NOUVEAU: Marquer une tâche comme terminée
+    @PostMapping("/tache/{tacheId}/terminer")
+    public ResponseEntity<?> terminerTache(@PathVariable("tacheId") Long tacheId) {
+        try {
+            tacheService.terminerTache(tacheId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

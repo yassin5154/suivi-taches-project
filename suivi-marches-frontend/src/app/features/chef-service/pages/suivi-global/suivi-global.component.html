@@ -1,1 +1,158 @@
-<p>suivi-global works!</p>
+<!-- suivi-global.component.html -->
+<div class="dashboard-container">
+  <!-- Page Header -->
+  <div class="page-header animate-fade-in">
+    <h1 class="gradient-title">Suivi Global des Tâches du Service</h1>
+    <p class="subtitle">Visualisez l'avancement général des tâches et besoins validés</p>
+  </div>
+
+  <!-- Ajouter cette section après le header -->
+<div *ngIf="loading" class="loading-overlay">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <p>Chargement des données de suivi...</p>
+  </div>
+</div>
+
+  <!-- KPI Cards Section -->
+  <div class="kpi-grid">
+    <div class="kpi-card card-hover animate-slide-up" style="animation-delay: 0.1s">
+      <div class="kpi-icon-wrapper blue-gradient">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-value">{{ kpiData.totalBesoins }}</h3>
+        <p class="kpi-label">Total Besoins Acceptés</p>
+      </div>
+    </div>
+
+    <div class="kpi-card card-hover animate-slide-up" style="animation-delay: 0.2s">
+      <div class="kpi-icon-wrapper cyan-gradient">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-value">{{ kpiData.totalTaches }}</h3>
+        <p class="kpi-label">Total Tâches Validées</p>
+      </div>
+    </div>
+
+    <div class="kpi-card card-hover animate-slide-up" style="animation-delay: 0.3s">
+      <div class="kpi-icon-wrapper green-gradient">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-value">{{ getPercentage(kpiData.tachesTerminees, kpiData.totalTaches) }}%</h3>
+        <p class="kpi-label">Tâches Terminées</p>
+      </div>
+    </div>
+
+    <div class="kpi-card card-hover animate-slide-up" style="animation-delay: 0.4s">
+      <div class="kpi-icon-wrapper red-gradient">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-value">{{ getPercentage(kpiData.tachesRetard, kpiData.totalTaches) }}%</h3>
+        <p class="kpi-label">Tâches en Retard</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-grid">
+    <!-- Chart 1: Status Distribution -->
+    <div class="chart-card card-hover animate-slide-up" style="animation-delay: 0.5s">
+      <div class="chart-header">
+        <i class="fas fa-chart-pie chart-icon"></i>
+        <h3>Répartition des Tâches</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Employee Performance -->
+    <div class="chart-card card-hover animate-slide-up" style="animation-delay: 0.6s">
+      <div class="chart-header">
+        <i class="fas fa-users chart-icon"></i>
+        <h3>Performance par Employé</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="employeeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 3: Progress Over Time -->
+    <div class="chart-card card-hover animate-slide-up" style="animation-delay: 0.7s">
+      <div class="chart-header">
+        <i class="fas fa-chart-line chart-icon"></i>
+        <h3>Progression Hebdomadaire</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="progressChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 4: Radar Performance -->
+    <div class="chart-card card-hover animate-slide-up" style="animation-delay: 0.8s">
+      <div class="chart-header">
+        <i class="fas fa-tachometer-alt chart-icon"></i>
+        <h3>Métriques de Performance</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tasks Table Section -->
+  <div class="table-card card-hover animate-slide-up" style="animation-delay: 1s">
+    <div class="table-header">
+      <i class="fas fa-list chart-icon"></i>
+      <h3>Détails des Tâches</h3>
+    </div>
+    <div class="table-container">
+      <table class="tasks-table">
+        <thead>
+          <tr>
+            <th>Tâche</th>
+            <th>Employé</th>
+            <th>Besoin</th>
+            <th>Date Début</th>
+            <th>Durée Estimée</th>
+            <th>Statut</th>
+            <th>Différence</th>
+            <th>Progression</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let task of taskTable" class="table-row-hover">
+            <td class="font-medium">{{ task.tache }}</td>
+            <td>{{ task.employe }}</td>
+            <td>{{ task.besoin }}</td>
+            <td>{{ task.dateDebut | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ task.duree }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(task.statut)">
+                {{ getStatusLabel(task.statut) }}
+              </span>
+            </td>
+            <td>
+              <span class="difference-badge" [ngClass]="getDifferenceClass(task.difference)">
+                {{ task.difference }}
+              </span>
+            </td>
+            <td>
+              <div class="progress-wrapper">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="task.progression"></div>
+                </div>
+                <span class="progress-text">{{ task.progression }}%</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

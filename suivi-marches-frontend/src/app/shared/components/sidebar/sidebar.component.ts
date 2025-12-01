@@ -95,16 +95,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { 
       label: 'Suivi global', 
       icon: 'timeline', 
-      route: '/chef/tracking', 
+      route: '/chef-service/suivi-global', 
       roles: ['CHEF'] 
     },
-    { 
-      label: 'Statistiques', 
-      icon: 'bar_chart', 
-      route: '/chef/statistics', 
-      roles: ['CHEF'] 
-    },
-    
     // Employé
     { 
       label: 'Créer un besoin (CPS)', 
@@ -119,11 +112,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: ['EMPLOYE'] 
     },
     { 
-      label: 'Notifications', 
+      label: 'Suivi tâches', 
       icon: 'notifications', 
-      route: '/employe/notifications', 
+      route: '/employe/suivi', 
       roles: ['EMPLOYE'], 
-      badge: 3 
     },
     
     // Commun à tous

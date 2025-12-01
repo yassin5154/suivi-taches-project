@@ -1,0 +1,127 @@
+<div class="suivi-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Suivi des Tâches</h1>
+    <p class="page-subtitle">Consultez l'avancement et signalez la fin de vos tâches.</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des tâches...</p>
+  </div>
+
+  <!-- Tasks List -->
+  <div *ngIf="!loading" class="tasks-container">
+    <!-- Besoin Group -->
+    <div *ngFor="let group of tachesParBesoin; let i = index" 
+         class="besoin-card" 
+         [style.animation-delay]="i * 0.1 + 's'">
+      
+      <!-- Besoin Header -->
+      <div class="besoin-header" (click)="toggleBesoin(group.besoin.id)">
+        <div class="besoin-info">
+          <h2 class="besoin-title">{{ group.besoin.titre }}</h2>
+          <div class="besoin-meta">
+            <span class="besoin-creator">Créé par {{ getEmployeName(group.besoin) }}</span>
+            <span class="besoin-date" *ngIf="group.besoin.validationDate">
+              Validé le {{ formatDate(group.besoin.validationDate) }}
+            </span>
+            <span class="besoin-date" *ngIf="!group.besoin.validationDate">
+              Date de validation non spécifiée
+            </span>
+          </div>
+        </div>
+        <div class="toggle-icon">
+          <svg *ngIf="!group.expanded" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+          <svg *ngIf="group.expanded" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Tasks List (Expanded) -->
+      <div *ngIf="group.expanded" class="tasks-list">
+        <div *ngFor="let task of group.taches" class="task-card">
+          
+          <!-- Task Header -->
+          <div class="task-header">
+            <div class="task-info">
+              <h3 class="task-title">{{ task.titre }}</h3>
+              <p class="task-description" *ngIf="task.description">{{ task.description }}</p>
+              <p class="task-description no-description" *ngIf="!task.description">
+                Aucune description fournie
+              </p>
+            </div>
+            <span [class]="'status-badge ' + getStatusBadge(task.statut, isTaskLate(task)).color">
+              {{ getStatusBadge(task.statut, isTaskLate(task)).text }}
+            </span>
+          </div>
+
+          <!-- Task Details Grid -->
+          <div class="task-details-grid">
+            <div class="detail-item">
+              <p class="detail-label">Date de début</p>
+              <p class="detail-value">{{ formatDate(task.dateFinale) }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Durée estimée</p>
+              <p class="detail-value">{{ formatDuree(task.dureeEstimee) }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Date limite</p>
+              <p class="detail-value">{{ formatDate(calculateDeadline(task.dateFinale, task.dureeEstimee).toISOString()) }}</p>
+            </div>
+            <div class="detail-item">
+              <p class="detail-label">Progression</p>
+              <p class="detail-value">{{ calculateProgress(task) }}%</p>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-container">
+            <div class="progress-bar" [style.width]="calculateProgress(task) + '%'"></div>
+          </div>
+
+          <!-- Late Warning -->
+          <div *ngIf="isTaskLate(task) && task.statut !== 'TERMINEE'" class="alert alert-danger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <p>Cette tâche est en retard !</p>
+          </div>
+
+          <!-- Completion Note -->
+          <div *ngIf="generateCompletionNote(task)" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <p>{{ generateCompletionNote(task) }}</p>
+          </div>
+
+          <!-- Action Button -->
+          <button *ngIf="task.statut !== 'TERMINEE'" 
+                  class="btn-complete"
+                  (click)="markTaskAsDone(task.id)">
+            Marquer comme terminée
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="tachesParBesoin.length === 0" class="empty-state">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <p>Aucune tâche disponible pour le moment.</p>
+      <p class="empty-subtitle">Les tâches apparaîtront ici une fois que les besoins de votre service seront acceptés par le chef.</p>
+    </div>
+  </div>
+</div>

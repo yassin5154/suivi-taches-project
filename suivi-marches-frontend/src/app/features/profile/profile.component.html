@@ -1,0 +1,34 @@
+<div class="profile-container">
+  <h2>Mon Profil</h2>
+
+  <div class="card">
+    <div class="row">
+      <label>Nom :</label>
+      <input [(ngModel)]="profile.nom" type="text" />
+    </div>
+
+    <div class="row">
+      <label>Prénom :</label>
+      <input [(ngModel)]="profile.prenom" type="text" />
+    </div>
+
+    <div class="row">
+      <label>Email :</label>
+      <input [(ngModel)]="profile.email" type="email" />
+    </div>
+
+    <div class="row">
+      <label>Nom d'utilisateur :</label>
+      <input [(ngModel)]="profile.username" type="text" />
+    </div>
+
+    <div class="row">
+      <label>Nouveau mot de passe :</label>
+      <input [(ngModel)]="newPassword" type="password" placeholder="Laissez vide pour ne pas changer" />
+    </div>
+
+    <button (click)="updateProfile()" class="btn-save">
+      Sauvegarder les modifications
+    </button>
+  </div>
+</div>

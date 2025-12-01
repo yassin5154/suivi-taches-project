@@ -17,4 +17,8 @@ public interface BesoinRepository extends JpaRepository<Besoin, Long> {
     @Query("SELECT b FROM Besoin b JOIN b.employe e WHERE e.service = :service")
     List<Besoin> findByService(@Param("service") String service);
 
+    // NOUVEAU: Trouver les besoins par service et statut
+    @Query("SELECT b FROM Besoin b JOIN b.employe e WHERE e.service = :service AND b.statut = :statut")
+    List<Besoin> findByServiceAndStatut(@Param("service") String service, @Param("statut") String statut);
+
 }
